@@ -11,6 +11,7 @@ function Navigation() {
         </Link>
         <div className="nav-links-container">
           <Link to="/shop">Shop</Link>
+          <Link to="/sign-in">SIGN IN</Link>
         </div>
       </div>
       <Outlet />
