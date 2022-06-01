@@ -1,8 +1,14 @@
 import { useState } from "react";
+// import { UserContext } from "../../contexts/user.context";
 import {
   createAuthUserWithEmailAndPassword,
   createUserDocumentFromAuth,
 } from "../../utils/firebase/firebase.utlis";
+
+import "./sign-up-form.styles.scss";
+import FormInput from "../form-input/form-input.component";
+import Button from "../button/button.component";
+
 const defaultFormFields = {
   displayName: "",
   email: "",
@@ -10,7 +16,7 @@ const defaultFormFields = {
   confirmPassword: "",
 };
 
-const SignUp = () => {
+const SignUpForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
   //   console.log(formFields);
@@ -18,6 +24,8 @@ const SignUp = () => {
     const { name, value } = event.target;
     setFormFields({ ...formFields, [name]: value });
   };
+
+  // const { setCurrentUser } = useContext(UserContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -32,7 +40,7 @@ const SignUp = () => {
         email,
         password
       );
-      console.log(user);
+      // setCurrentUser(user);
       await createUserDocumentFromAuth(user, { displayName });
       //   console.log(response);
     } catch (error) {
@@ -41,11 +49,13 @@ const SignUp = () => {
   };
 
   return (
-    <div>
-      <h1>Create New Account</h1>
+    <div className="sign-up-container">
+      <h2>Don't have an account?</h2>
+      <span>Sign up with your Email and Password</span>
+
       <form onSubmit={handleSubmit}>
-        <label>Your Name</label>
-        <input
+        <FormInput
+          label="Display Name"
           type="text"
           name="displayName"
           value={displayName}
@@ -53,8 +63,8 @@ const SignUp = () => {
           required
         />
 
-        <label>Your Email</label>
-        <input
+        <FormInput
+          label="Email"
           type="email"
           name="email"
           value={email}
@@ -62,8 +72,8 @@ const SignUp = () => {
           required
         />
 
-        <label>Create Password</label>
-        <input
+        <FormInput
+          label="Password"
           type="password"
           name="password"
           value={password}
@@ -71,8 +81,8 @@ const SignUp = () => {
           required
         />
 
-        <label>Confirm Password</label>
-        <input
+        <FormInput
+          label="Confirm Your Password"
           type="password"
           name="confirmPassword"
           value={confirmPassword}
@@ -80,10 +90,10 @@ const SignUp = () => {
           required
         />
 
-        <button type="submit">Sign UP</button>
+        <Button type="submit" children="Sign Up" />
       </form>
     </div>
   );
 };
 
-export default SignUp;
+export default SignUpForm;

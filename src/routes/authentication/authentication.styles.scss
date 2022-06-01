@@ -1,0 +1,13 @@
+.form-group{
+    display: flex;
+    // flex-direction: row;
+    justify-content:space-around;
+}
+
+.authentication-container{
+    display: flex;
+    justify-content: space-between;
+    width: 900px;
+    margin :30px auto;
+
+}
