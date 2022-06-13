@@ -34,7 +34,17 @@ const SignInForm = () => {
       await signInAuthUserWithEmailAndPassword(email, password);
       resetFormFields();
     } catch (error) {
-      console.log("user sign in failed", error);
+      switch (error.code) {
+        case "auth/wrong-password":
+          alert("Please Check Your Password Again");
+          break;
+        case "auth/user-not-found":
+          alert("No user is associated with this email");
+          break;
+        default:
+          alert(error);
+          break;
+      }
     }
   };
 
