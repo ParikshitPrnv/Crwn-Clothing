@@ -1,98 +1,104 @@
-import { useState } from "react";
-// import { UserContext } from "../../contexts/user.context";
+import { useState } from 'react';
+
+import FormInput from '../form-input/form-input.component';
+import Button from '../button/button.component';
+
 import {
   createAuthUserWithEmailAndPassword,
   createUserDocumentFromAuth,
-} from "../../utils/firebase/firebase.utlis";
+} from '../../utils/firebase/firebase.utils';
 
-import "./sign-up-form.styles.scss";
-import FormInput from "../form-input/form-input.component";
-import Button from "../button/button.component";
+import { SignUpContainer } from './sign-up-form.styles';
 
 const defaultFormFields = {
-  displayName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
+  displayName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
 };
 
 const SignUpForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
-  //   console.log(formFields);
-  const onChangeHandler = (event) => {
-    const { name, value } = event.target;
-    setFormFields({ ...formFields, [name]: value });
-  };
 
-  // const { setCurrentUser } = useContext(UserContext);
+  const resetFormFields = () => {
+    setFormFields(defaultFormFields);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // const { email, password, confirmPassword } = event.target;
+
     if (password !== confirmPassword) {
-      alert("password is not confirmed");
+      alert('passwords do not match');
       return;
-    } //   console.log({ password, confirmPassword });
+    }
 
     try {
       const { user } = await createAuthUserWithEmailAndPassword(
         email,
         password
       );
-      // setCurrentUser(user);
+
       await createUserDocumentFromAuth(user, { displayName });
-      //   console.log(response);
+      resetFormFields();
     } catch (error) {
-      console.log(error);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('Cannot create user, email already in use');
+      } else {
+        console.log('user creation encountered an error', error);
+      }
     }
   };
 
-  return (
-    <div className="sign-up-container">
-      <h2>Don't have an account?</h2>
-      <span>Sign up with your Email and Password</span>
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
+    setFormFields({ ...formFields, [name]: value });
+  };
+
+  return (
+    <SignUpContainer>
+      <h2>Don't have an account?</h2>
+      <span>Sign up with your email and password</span>
       <form onSubmit={handleSubmit}>
         <FormInput
-          label="Display Name"
-          type="text"
-          name="displayName"
+          label='Display Name'
+          type='text'
+          required
+          onChange={handleChange}
+          name='displayName'
           value={displayName}
-          onChange={onChangeHandler}
-          required
         />
 
         <FormInput
-          label="Email"
-          type="email"
-          name="email"
+          label='Email'
+          type='email'
+          required
+          onChange={handleChange}
+          name='email'
           value={email}
-          onChange={onChangeHandler}
-          required
         />
 
         <FormInput
-          label="Password"
-          type="password"
-          name="password"
+          label='Password'
+          type='password'
+          required
+          onChange={handleChange}
+          name='password'
           value={password}
-          onChange={onChangeHandler}
-          required
         />
 
         <FormInput
-          label="Confirm Your Password"
-          type="password"
-          name="confirmPassword"
-          value={confirmPassword}
-          onChange={onChangeHandler}
+          label='Confirm Password'
+          type='password'
           required
+          onChange={handleChange}
+          name='confirmPassword'
+          value={confirmPassword}
         />
-
-        <Button type="submit" children="Sign Up" />
+        <Button type='submit'>Sign Up</Button>
       </form>
-    </div>
+    </SignUpContainer>
   );
 };
 

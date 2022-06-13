@@ -1,30 +1,52 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState, useEffect } from 'react';
 
 const addCartItem = (cartItems, productToAdd) => {
-  // find if cartItems contains productToAdd
-  if (cartItems.find((item) => item.id === productToAdd.id)) {
-    // if found increment quantity and return the cartItems array
-    return cartItems.map((item) =>
-      item.id === productToAdd.id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
+  const existingCartItem = cartItems.find(
+    (cartItem) => cartItem.id === productToAdd.id
+  );
+
+  if (existingCartItem) {
+    return cartItems.map((cartItem) =>
+      cartItem.id === productToAdd.id
+        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+        : cartItem
     );
   }
 
-  // if no such product exists in cartItems,   return new array with modified cartItems
   return [...cartItems, { ...productToAdd, quantity: 1 }];
 };
+
+const removeCartItem = (cartItems, cartItemToRemove) => {
+  // find the cart item to remove
+  const existingCartItem = cartItems.find(
+    (cartItem) => cartItem.id === cartItemToRemove.id
+  );
+
+  // check if quantity is equal to 1, if it is remove that item from the cart
+  if (existingCartItem.quantity === 1) {
+    return cartItems.filter((cartItem) => cartItem.id !== cartItemToRemove.id);
+  }
+
+  // return back cartitems with matching cart item with reduced quantity
+  return cartItems.map((cartItem) =>
+    cartItem.id === cartItemToRemove.id
+      ? { ...cartItem, quantity: cartItem.quantity - 1 }
+      : cartItem
+  );
+};
+
+const clearCartItem = (cartItems, cartItemToClear) =>
+  cartItems.filter((cartItem) => cartItem.id !== cartItemToClear.id);
 
 export const CartContext = createContext({
   isCartOpen: false,
   setIsCartOpen: () => {},
   cartItems: [],
   addItemToCart: () => {},
+  removeItemFromCart: () => {},
+  clearItemFromCart: () => {},
   cartCount: 0,
   cartTotal: 0,
-  removeItemFromCart: () => {},
-  removeItemFromCheckout: () => {},
-  calculateTotal: () => {},
 });
 
 export const CartProvider = ({ children }) => {
@@ -35,71 +57,42 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const newCartCount = cartItems.reduce(
-      (total, item) => total + item.quantity,
+      (total, cartItem) => total + cartItem.quantity,
       0
     );
     setCartCount(newCartCount);
+  }, [cartItems]);
+
+  useEffect(() => {
+    const newCartTotal = cartItems.reduce(
+      (total, cartItem) => total + cartItem.quantity * cartItem.price,
+      0
+    );
+    setCartTotal(newCartTotal);
   }, [cartItems]);
 
   const addItemToCart = (productToAdd) => {
     setCartItems(addCartItem(cartItems, productToAdd));
   };
 
-  const removeItemFromCart = (productToRemove) => {
-    const newCart = cartItems.map((cartItem) => {
-      return cartItem.id === productToRemove.id
-        ? { ...cartItem, quantity: cartItem.quantity - 1 }
-        : cartItem;
-    });
-    return setCartItems(newCart.filter((cartItem) => cartItem.quantity !== 0));
+  const removeItemToCart = (cartItemToRemove) => {
+    setCartItems(removeCartItem(cartItems, cartItemToRemove));
   };
 
-  const removeItemFromCheckout = (productToRemove) => {
-    return setCartItems(
-      cartItems.filter((cartItem) => cartItem.id !== productToRemove.id)
-    );
+  const clearItemFromCart = (cartItemToClear) => {
+    setCartItems(clearCartItem(cartItems, cartItemToClear));
   };
-
-  useEffect(() => {
-    const newCartTotal = cartItems.reduce(
-      (total, item) => total + item.quantity * item.price,
-      0
-    );
-    setCartTotal(newCartTotal);
-  }, [cartItems]);
 
   const value = {
     isCartOpen,
     setIsCartOpen,
-    cartItems,
     addItemToCart,
+    removeItemToCart,
+    clearItemFromCart,
+    cartItems,
     cartCount,
-    removeItemFromCart,
-    removeItemFromCheckout,
     cartTotal,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
-
-/*
-product
-{
-    id, name, price, imageUrl
-}
-
-cartItem
-{
-    id, name, price, imageUrl, quantity
-}
-*/
-
-/*
-{
-      id: 1,
-      name: "Brown Brim",
-      imageUrl: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-      price: 25,
-      quantity: 5,
-    },
-    */
